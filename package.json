@@ -1,0 +1,27 @@
+{
+  "name": "clipsync",
+  "version": "1.0.0",
+  "description": "Cross-Platform Real-Time Clipboard Synchronization for Windows, macOS, and iOS",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "npm --prefix desktop start",
+    "dev": "npm --prefix desktop start",
+    "server": "npm --prefix server start",
+    "install:all": "npm install && npm --prefix desktop install && npm --prefix server install",
+    "build:mac": "npm --prefix desktop run build:mac",
+    "build:win": "npm --prefix desktop run build:win",
+    "build:all": "npm --prefix desktop run build:mac && npm --prefix desktop run build:win"
+  },
+  "keywords": [
+    "clipboard",
+    "clipboard-manager",
+    "cross-platform",
+    "electron",
+    "macos",
+    "windows",
+    "ios",
+    "websocket",
+    "realtime-sync"
+  ]
+}

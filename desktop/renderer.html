@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClipSync</title>
+  <style>
+    :root {
+      --bg-app: #09090b;
+      --bg-header: rgba(14, 14, 17, 0.88);
+      --bg-surface: #121216;
+      --bg-surface-hover: #18181d;
+      --bg-surface-active: rgba(94, 106, 210, 0.12);
+      --bg-input: #0e0e11;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-default: rgba(255, 255, 255, 0.11);
+      --border-focus: #5e6ad2;
+      --accent: #5e6ad2;
+      --accent-hover: #6e7ae2;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-tertiary: #71717a;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
+    }
+
+    /* Light Mode */
+    body.theme-light {
+      --bg-app: #f8fafc;
+      --bg-header: rgba(248, 250, 252, 0.94);
+      --bg-surface: #ffffff;
+      --bg-surface-hover: #f1f5f9;
+      --bg-surface-active: rgba(79, 70, 229, 0.1);
+      --bg-input: #ffffff;
+      --border-subtle: rgba(15, 23, 42, 0.08);
+      --border-default: rgba(15, 23, 42, 0.14);
+      --border-focus: #4f46e5;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      border-color: rgba(15, 23, 42, 0.14);
+    }
+    body.theme-light .modal {
+      background: #ffffff;
+      border-color: rgba(15, 23, 42, 0.12);
+      box-shadow: 0 20px 48px rgba(15, 23, 42, 0.16);
+    }
+    body.theme-light .section-card {
+      background: #f8fafc;
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+    body.theme-light .code-badge {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #3730a3;
+    }
+    body.theme-light .kbd-tag {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+    body.theme-light .file-row {
+      background: #f8fafc;
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+    body.theme-light .toast {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    body.theme-light .clip-card.latest-active {
+      border-color: rgba(79, 70, 229, 0.35);
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+    }
+    body.theme-light .device-chip {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #334155;
+    }
+    body.theme-light .segmented-tabs {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+    body.theme-light .seg-tab.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    body.theme-light .search-wrap {
+      background: #ffffff;
+      border-color: #cbd5e1;
+    }
+    body.theme-light .drop-overlay {
+      background: rgba(248, 250, 252, 0.95);
+      color: #0f172a;
+    }
+
+    /* Theme Picker UI */
+    .theme-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 5px 7px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .theme-btn:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-focus);
+    }
+    .theme-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 1px 4px rgba(94, 106, 210, 0.35);
+    }
+
+    /* Shortcut Recorder UI */
+    .shortcut-recorder-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .shortcut-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5.5px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      min-height: 30px;
+    }
+    .shortcut-box:hover {
+      border-color: var(--border-focus);
+    }
+    .shortcut-box.recording {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+    .recording-badge {
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(245, 158, 11, 0.18);
+      color: #f59e0b;
+      padding: 2px 6px;
+      border-radius: 4px;
+      animation: recPulse 1.2s infinite;
+    }
+    @keyframes recPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .field-hint {
+      font-size: 10.5px;
+      color: var(--text-tertiary);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    /* Build Info at Footer of Settings Modal */
+    .settings-build-bar {
+      margin-top: 6px;
+      padding-top: 5px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--text-tertiary);
+    }
+    .platform-pill {
+      font-size: 10px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: var(--text-secondary);
+    }
+    body.theme-light .platform-pill {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard", "Segoe UI", sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      font-size: 12.5px;
+      letter-spacing: -0.01em;
+    }
+
+    svg {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    /* Header */
+    .header {
+      padding: 12px 14px 10px;
+      background: var(--bg-header);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      -webkit-app-region: no-drag;
+    }
+
+    body.modal-open .header {
+      -webkit-app-region: no-drag !important;
+    }
+
+    button,
+    input,
+    select,
+    textarea,
+    a {
+      -webkit-app-region: no-drag !important;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      -webkit-app-region: no-drag;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      -webkit-app-region: drag;
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 8px rgba(79, 70, 229, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .brand-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-title-row h1 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+    }
+    .status-dot.offline {
+      background: var(--danger);
+      box-shadow: none;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      -webkit-app-region: no-drag;
+    }
+
+    .icon-btn {
+      height: 28px;
+      padding: 0 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.12s ease;
+      -webkit-app-region: no-drag;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border-color: var(--border-default);
+    }
+
+    .icon-btn.active {
+      background: rgba(94, 106, 210, 0.18);
+      border-color: rgba(94, 106, 210, 0.5);
+      color: #c7d2fe;
+    }
+
+    .icon-btn.only-icon {
+      width: 28px;
+      padding: 0;
+    }
+
+    /* Distinct Pin Window Button States (ON vs OFF) */
+    #pinWindowBtn:not(.active) {
+      background: transparent !important;
+      border-color: var(--border-subtle) !important;
+      color: var(--text-tertiary) !important;
+      box-shadow: none !important;
+    }
+    #pinWindowBtn:not(.active):hover {
+      background: rgba(255, 255, 255, 0.05) !important;
+      color: var(--text-secondary) !important;
+    }
+    body.theme-light #pinWindowBtn:not(.active):hover {
+      background: rgba(15, 23, 42, 0.05) !important;
+    }
+    #pinWindowBtn:not(.active) svg {
+      transform: rotate(35deg);
+      transition: transform 0.15s ease;
+      opacity: 0.72;
+    }
+    #pinWindowBtn.active {
+      background: var(--accent) !important;
+      border-color: var(--accent) !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 0 1px rgba(94, 106, 210, 0.45), 0 2px 8px rgba(94, 106, 210, 0.4) !important;
+    }
+    #pinWindowBtn.active svg {
+      transform: rotate(0deg);
+      transition: transform 0.15s ease;
+      opacity: 1;
+    }
+
+    /* Devices Bar */
+    .devices-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 9px;
+      overflow-x: auto;
+      -webkit-app-region: no-drag;
+    }
+
+    .device-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 500;
+      padding: 2.5px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    /* Controls: Search & Filter Segmented Bar */
+    .controls {
+      padding: 10px 14px;
+      background: var(--bg-app);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 7px 10px 7px 30px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      background: #141419;
+    }
+
+    .segmented-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
+      background: var(--bg-surface);
+      padding: 3px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .seg-tab {
+      text-align: center;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 4.5px 0;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .seg-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .seg-tab.active {
+      background: #222229;
+      color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    /* History List */
+    .history-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      color: var(--text-tertiary);
+      padding: 32px 20px;
+      gap: 10px;
+    }
+
+    .empty-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+
+    .clip-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease;
+      position: relative;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    }
+
+    .clip-card:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-default);
+    }
+
+    .clip-card.latest-active {
+      background: var(--bg-surface-active);
+      border-color: rgba(94, 106, 210, 0.45);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .card-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .kbd-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10px;
+      color: var(--text-tertiary);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 1px 5px;
+      line-height: 1.3;
+    }
+
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1.5px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 10.5px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+    }
+
+    .type-badge.url {
+      background: rgba(56, 189, 248, 0.12);
+      color: #7dd3fc;
+    }
+    .type-badge.image {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+    }
+    .type-badge.file {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+    }
+
+    .source-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .time-label {
+      font-size: 10.5px;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      font-size: 12.5px;
+      line-height: 1.48;
+      color: var(--text-primary);
+      word-break: break-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      user-select: text;
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--border-subtle);
+      padding: 7px 10px;
+      border-radius: 6px;
+    }
+
+    .file-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 12px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-size {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-img {
+      max-width: 100%;
+      max-height: 120px;
+      border-radius: 6px;
+      margin-top: 2px;
+      object-fit: contain;
+      background: #070709;
+      border: 1px solid var(--border-subtle);
+      display: block;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .active-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .clip-card.latest-active .active-indicator {
+      color: #a5b4fc;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn {
+      height: 22px;
+      padding: 0 7px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-tertiary);
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.12s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .action-btn.pinned {
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    /* Dropzone Overlay */
+    .drop-overlay {
+      position: fixed;
+      inset: 8px;
+      background: rgba(9, 9, 11, 0.92);
+      backdrop-filter: blur(8px);
+      border: 1.5px dashed var(--accent);
+      border-radius: 10px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 800;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      -webkit-app-region: no-drag;
+    }
+    .drop-overlay.active {
+      display: flex;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 8px 14px;
+      background: var(--bg-header);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .footer-shortcut {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.12s ease;
+    }
+
+    .footer-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-btn.danger:hover {
+      color: #f87171;
+    }
+
+    .divider-v {
+      width: 1px;
+      height: 10px;
+      background: var(--border-subtle);
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 38px 12px 12px;
+      z-index: 999;
+      -webkit-app-region: no-drag !important;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #141418;
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      width: 100%;
+      max-height: calc(100vh - 50px);
+      overflow-y: auto;
+      padding: 11px 13px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      -webkit-app-region: no-drag !important;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      -webkit-app-region: no-drag !important;
+    }
+
+    .modal-head .icon-btn.only-icon {
+      width: 32px;
+      height: 32px;
+      position: relative;
+      z-index: 1000;
+      cursor: pointer;
+      -webkit-app-region: no-drag !important;
+    }
+
+    .modal-head h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      -webkit-app-region: no-drag !important;
+    }
+
+    .field {
+      margin-bottom: 5px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      margin-bottom: 2.5px;
+      font-weight: 500;
+    }
+
+    .field input[type="text"] {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      padding: 5px 9px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      outline: none;
+      transition: border-color 0.12s ease;
+    }
+
+    .field input[type="text"]:focus {
+      border-color: var(--border-focus);
+    }
+
+    .qr-wrapper {
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 8px;
+      width: 148px;
+      height: 148px;
+      margin: 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-wrapper img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .section-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 6px 9px;
+      font-size: 11px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .section-card strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-size: 11px;
+      padding: 1.5px 0;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 13px;
+      height: 13px;
+      cursor: pointer;
+    }
+
+    .btn-primary-full {
+      width: 100%;
+      background: var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 11.5px;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      margin-top: 2px;
+      transition: background 0.12s ease;
+    }
+
+    .btn-primary-full:hover {
+      background: var(--accent-hover);
+    }
+
+    .code-badge {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 4px 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      color: #c7d2fe;
+      border-radius: 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      user-select: text;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 42px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: #18181b;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 999px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      z-index: 1000;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <div id="dropOverlay" class="drop-overlay">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5e6ad2" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <div>파일이나 이미지를 놓으면 연결된 모든 기기로 즉시 동기화됩니다</div>
+  </div>
+
+  <div class="header">
+    <div class="header-top">
+      <div class="brand">
+        <div class="logo-mark" style="background:linear-gradient(135deg,#14182d 0%,#08090e 100%);border:1px solid rgba(99,102,241,0.35);box-shadow:0 2px 8px rgba(0,0,0,0.5);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="7.5" y="2.5" width="13.5" height="14.5" rx="3" fill="#4f46e5" fill-opacity="0.55" stroke="#818cf8" stroke-width="1.6"/>
+            <rect x="3" y="6.5" width="13.5" height="15" rx="3.2" fill="#0d111c" stroke="#818cf8" stroke-width="1.8"/>
+            <path d="M6.5 12h6.5M6.5 15.8h4.5" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>ClipSync</h1>
+          </div>
+          <div class="status-badge">
+            <span id="connDot" class="status-dot"></span>
+            <span id="connText">연결 확인 중...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="icon-btn" onclick="openIosModal()" title="모바일 및 다른 PC 연결">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          <span>기기 연결</span>
+        </button>
+        <button class="icon-btn" onclick="uploadFiles()" title="파일 또는 이미지 공유">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span>업로드</span>
+        </button>
+        <button id="pinWindowBtn" class="icon-btn only-icon" onclick="togglePinWindow()" title="창 항상 위에 고정">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="17" x2="12" y2="22"/>
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+          </svg>
+        </button>
+        <button class="icon-btn only-icon" onclick="openSettingsModal()" title="환경설정">
+          <svg width="13.5" height="13.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="icon-btn only-icon" onclick="window.clipsync.hideWindow()" title="창 닫기 (Esc)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="devicesBar" class="devices-bar"></div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <svg class="search-icon" width="13.5" height="13.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="searchInput" class="search-input" type="search" placeholder="클립보드 히스토리 검색..." oninput="renderList()" />
+    </div>
+    <div class="segmented-tabs">
+      <button class="seg-tab active" onclick="setTab('all', this)">전체</button>
+      <button class="seg-tab" onclick="setTab('text', this)">텍스트·링크</button>
+      <button class="seg-tab" onclick="setTab('image', this)">이미지</button>
+      <button class="seg-tab" onclick="setTab('file', this)">파일</button>
+      <button class="seg-tab" onclick="setTab('pinned', this)">고정됨</button>
+    </div>
+  </div>
+
+  <div id="historyContainer" class="history-container"></div>
+
+  <div class="footer">
+    <div class="footer-shortcut">
+      <span>단축키</span>
+      <span id="footerShortcutTag" class="kbd-tag">Cmd/Ctrl + Shift + V</span>
+    </div>
+    <div class="footer-actions">
+      <button class="footer-btn" onclick="window.clipsync.openDownloads()">수신 폴더</button>
+      <span class="divider-v"></span>
+      <button class="footer-btn" onclick="clearAllHistory()">비우기</button>
+      <span class="divider-v"></span>
+      <button class="footer-btn danger" onclick="window.clipsync.quitApp()">종료</button>
+    </div>
+  </div>
+
+  <!-- Device Pairing & iOS Modal -->
+  <div id="iosModal" class="modal-backdrop" onclick="if(event.target===this)closeIosModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5e6ad2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          <span>iOS 및 데스크탑 기기 연결</span>
+        </h2>
+        <button type="button" class="icon-btn only-icon" onclick="closeIosModal()" title="닫기">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="section-card">
+        <strong>1. Apple 유니버설 클립보드 자동 연동 (iOS)</strong><br/>
+        Windows나 다른 기기에서 복사한 항목이 이 Mac의 시스템 클립보드에 자동 반영됩니다. 동일한 Apple ID(Handoff 활성화)를 사용하는 iPhone에서는 별도 앱 실행 없이 <b>붙여넣기</b>만 누르면 즉시 입력됩니다.
+      </div>
+
+      <div class="section-card" style="text-align:center;">
+        <strong>2. 모바일 웹앱 및 단축어 연결 (QR 스캔)</strong>
+        <div class="qr-wrapper">
+          <img id="qrImg" src="" alt="QR Code" />
+        </div>
+        <div id="iosUrlText" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;color:var(--text-secondary);word-break:break-all;user-select:text;"></div>
+      </div>
+
+      <div class="section-card">
+        <strong>3. 개인 전용 동기화 키 (Sync Key)</strong><br/>
+        타인과의 혼선을 방지하기 위해 발급된 고유 키입니다. 본인의 Windows PC 및 iPhone에만 아래 키를 입력해 연결하세요.<br/>
+        <span id="iosSyncKeyBadge" class="code-badge"></span>
+      </div>
+
+      <button type="button" class="btn-primary-full" onclick="closeIosModal()">닫기</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop" onclick="if(event.target===this)closeSettingsModal()">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5e6ad2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>환경설정</span>
+        </h2>
+        <button type="button" class="icon-btn only-icon" onclick="closeSettingsModal()" title="닫기 (Esc)" style="width:32px;height:32px;cursor:pointer;-webkit-app-region:no-drag !important;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Theme Selection -->
+      <div class="field">
+        <label>화면 모드 (Theme)</label>
+        <div class="theme-picker">
+          <button type="button" id="themeBtnDark" class="theme-btn" onclick="selectTheme('dark')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span>다크 모드</span>
+          </button>
+          <button type="button" id="themeBtnLight" class="theme-btn" onclick="selectTheme('light')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <span>라이트 모드</span>
+          </button>
+          <button type="button" id="themeBtnSystem" class="theme-btn" onclick="selectTheme('system')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>시스템 설정</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Shortcut Customization -->
+      <div class="field">
+        <label>글로벌 단축키 (어디서나 클립보드 창 열기)</label>
+        <div class="shortcut-recorder-row">
+          <div id="shortcutBox" class="shortcut-box" onclick="toggleShortcutRecording()" title="클릭하여 단축키 변경">
+            <span id="shortcutDisplay">Cmd/Ctrl + Shift + V</span>
+            <span id="shortcutRecBadge" class="recording-badge" style="display:none;">키 입력 대기 중...</span>
+          </div>
+          <button type="button" class="icon-btn" onclick="resetDefaultShortcut()" title="기본 단축키로 복원">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            <span>기본값</span>
+          </button>
+        </div>
+        <div class="field-hint">박스를 클릭한 뒤 원하는 키 조합을 누르면 변경됩니다 (Esc: 취소).</div>
+      </div>
+
+      <div class="field">
+        <label>중계 서버 주소 (Server URL)</label>
+        <input id="cfgServerUrl" type="text" placeholder="http://localhost:4580 또는 https://..." />
+      </div>
+
+      <div class="field">
+        <label>동기화 방 키 (Sync Key — 동일 키를 사용하는 기기 간 격리 공유)</label>
+        <div style="display:flex;gap:6px;">
+          <input id="cfgSyncKey" type="text" placeholder="CS-XXXX-XXXX" style="flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;" />
+          <button type="button" class="icon-btn" onclick="generateNewSyncKey()" title="새 보안 키 생성">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            <span>재발급</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>기기 표시 이름</label>
+        <input id="cfgDeviceName" type="text" placeholder="MacBook Pro / Windows Desktop" />
+      </div>
+
+      <div class="section-card">
+        <label class="checkbox-row" style="margin-bottom:4px;">
+          <input id="cfgAutoLaunch" type="checkbox" />
+          <span>시스템 로그인 시 자동 실행 (백그라운드 트레이 모드)</span>
+        </label>
+        <label class="checkbox-row">
+          <input id="cfgAutoSync" type="checkbox" />
+          <span>수신된 클립보드 항목을 시스템 클립보드에 즉시 적용</span>
+        </label>
+      </div>
+
+      <button type="button" class="btn-primary-full" onclick="saveSettings()">설정 저장 및 적용</button>
+
+      <!-- Build Info at Bottom of Settings -->
+      <div class="settings-build-bar">
+        <span id="cfgBuildLabel">ClipSync v1.0.0 (Build 20261020.7)</span>
+        <span id="cfgPlatformLabel" class="platform-pill">Desktop</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span class="toast-dot"></span>
+    <span id="toastText">클립보드에 복사되었습니다</span>
+  </div>
+
+  <script>
+    let appState = {
+      isConnected: false,
+      config: {},
+      devices: [],
+      items: [],
+      iosUrl: '',
+      qrDataUrl: '',
+      appInfo: { version: '1.0.0', build: '20261020.7', buildNumber: '20261020.7', platform: 'darwin' },
+      isDark: true,
+      shortcutDisplay: '⌘⇧V'
+    };
+    let currentTab = 'all';
+    let selectedTheme = 'system';
+    let currentShortcut = 'CommandOrControl+Shift+V';
+    let isRecordingShortcut = false;
+
+    const ICONS = {
+      platform: (p) => {
+        if (p === 'darwin') {
+          return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+        }
+        if (p === 'win32') {
+          return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`;
+        }
+        if (p === 'ios') {
+          return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`;
+        }
+        return `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`;
+      },
+      file: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+      external: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+      download: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+      pin: (filled) => `<svg width="11.5" height="11.5" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+      trash: `<svg width="11.5" height="11.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`
+    };
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1900);
+    }
+
+    function formatShortcutDisplay(sc, platform) {
+      if (!sc) return 'Cmd/Ctrl + Shift + V';
+      const isMac = (platform === 'darwin') || (typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform));
+      if (isMac) {
+        return sc
+          .replace(/CommandOrControl/gi, '⌘')
+          .replace(/Command|Cmd/gi, '⌘')
+          .replace(/Shift/gi, '⇧')
+          .replace(/Alt|Option/gi, '⌥')
+          .replace(/Control|Ctrl/gi, '⌃')
+          .replace(/\+/g, '')
+          .replace(/\s+/g, '');
+      }
+      return sc
+        .replace(/CommandOrControl/gi, 'Ctrl')
+        .replace(/Command/gi, 'Ctrl')
+        .replace(/\+/g, ' + ');
+    }
+
+    function updateShortcutUI(disp) {
+      const text = disp || formatShortcutDisplay(currentShortcut, appState.appInfo ? appState.appInfo.platform : 'darwin');
+      const box = document.getElementById('shortcutDisplay');
+      if (box && !isRecordingShortcut) box.textContent = text;
+      const foot = document.getElementById('footerShortcutTag');
+      if (foot) foot.textContent = text;
+    }
+
+    function applyThemeToDOM(theme, isDark) {
+      const mode = theme || 'system';
+      let effectiveDark = isDark;
+      if (mode === 'dark') {
+        effectiveDark = true;
+      } else if (mode === 'light') {
+        effectiveDark = false;
+      } else {
+        effectiveDark = isDark !== undefined ? isDark : true;
+      }
+
+      document.body.classList.toggle('theme-light', !effectiveDark);
+
+      const btnDark = document.getElementById('themeBtnDark');
+      const btnLight = document.getElementById('themeBtnLight');
+      const btnSys = document.getElementById('themeBtnSystem');
+      if (btnDark) btnDark.classList.toggle('active', mode === 'dark');
+      if (btnLight) btnLight.classList.toggle('active', mode === 'light');
+      if (btnSys) btnSys.classList.toggle('active', mode === 'system');
+    }
+
+    function selectTheme(mode) {
+      selectedTheme = mode;
+      applyThemeToDOM(mode, appState.isDark);
+    }
+
+    function toggleShortcutRecording() {
+      if (isRecordingShortcut) {
+        stopShortcutRecording();
+      } else {
+        startShortcutRecording();
+      }
+    }
+
+    function startShortcutRecording() {
+      isRecordingShortcut = true;
+      const box = document.getElementById('shortcutBox');
+      const badge = document.getElementById('shortcutRecBadge');
+      const disp = document.getElementById('shortcutDisplay');
+      if (box) box.classList.add('recording');
+      if (badge) badge.style.display = 'inline-block';
+      if (disp) disp.textContent = '원하는 단축키를 누르세요...';
+    }
+
+    function stopShortcutRecording() {
+      isRecordingShortcut = false;
+      const box = document.getElementById('shortcutBox');
+      const badge = document.getElementById('shortcutRecBadge');
+      if (box) box.classList.remove('recording');
+      if (badge) badge.style.display = 'none';
+      updateShortcutUI();
+    }
+
+    function resetDefaultShortcut() {
+      currentShortcut = 'CommandOrControl+Shift+V';
+      stopShortcutRecording();
+      updateShortcutUI();
+      showToast('기본 단축키(Cmd/Ctrl+Shift+V)로 복원되었습니다');
+    }
+
+    function formatTime(iso) {
+      if (!iso) return '';
+      const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+      if (diff < 10) return '방금 전';
+      if (diff < 60) return `${diff}초 전`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+      return new Date(iso).toLocaleDateString('ko-KR');
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function updateHeader() {
+      const dot = document.getElementById('connDot');
+      const txt = document.getElementById('connText');
+      if (appState.isConnected) {
+        dot.classList.remove('offline');
+        txt.textContent = `동기화 활성 · ${appState.config.syncKey || 'default'}`;
+      } else {
+        dot.classList.add('offline');
+        txt.textContent = '서버 연결 대기 중';
+      }
+
+      const pinBtn = document.getElementById('pinWindowBtn');
+      const isPinned = Boolean(appState.config && appState.config.alwaysOnTop);
+      if (pinBtn) {
+        pinBtn.classList.toggle('active', isPinned);
+        pinBtn.setAttribute('aria-pressed', isPinned ? 'true' : 'false');
+        pinBtn.title = isPinned ? '창 항상 위에 고정됨 (클릭하여 해제)' : '창 항상 위에 고정 (클릭하여 켜기)';
+        pinBtn.innerHTML = `
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="${isPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;">
+            <line x1="12" y1="17" x2="12" y2="22"/>
+            <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/>
+          </svg>
+        `;
+      }
+
+      const bar = document.getElementById('devicesBar');
+      const devs = appState.devices || [];
+      if (devs.length === 0) {
+        bar.innerHTML = `<span class="device-chip">연결된 기기 없음</span>`;
+      } else {
+        bar.innerHTML = devs
+          .map((d) => `<span class="device-chip">${ICONS.platform(d.platform)}<span>${escapeHtml(d.deviceName)}</span></span>`)
+          .join('');
+      }
+    }
+
+    function renderList() {
+      const container = document.getElementById('historyContainer');
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const items = (appState.items || []).filter((item) => {
+        if (currentTab === 'text' && item.type !== 'text' && item.type !== 'url') return false;
+        if (currentTab === 'image' && item.type !== 'image') return false;
+        if (currentTab === 'file' && item.type !== 'file') return false;
+        if (currentTab === 'pinned' && !item.pinned) return false;
+        if (query) {
+          const hay = `${item.text || ''} ${item.fileName || ''} ${item.sourceDevice || ''}`.toLowerCase();
+          return hay.includes(query);
+        }
+        return true;
+      });
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              </svg>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);font-weight:500;">클립보드 내역이 비어 있습니다</div>
+            <div style="font-size:11px;line-height:1.5;">Windows, macOS, iOS에서 복사한 텍스트·이미지·파일이<br/>실시간으로 이곳에 기록됩니다.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items
+        .map((item, idx) => {
+          const isLatest = idx === 0 && currentTab === 'all' && !query;
+          const badgeText =
+            item.type === 'url'
+              ? 'URL'
+              : item.type === 'image'
+              ? '이미지'
+              : item.type === 'file'
+              ? '파일'
+              : '텍스트';
+
+          let bodyContent = '';
+          if (item.type === 'image' && item.imageDataUrl) {
+            bodyContent = `<img class="card-img" src="${item.imageDataUrl}" alt="clipboard image" onerror="this.style.display='none'" />`;
+          } else if (item.type === 'file') {
+            bodyContent = `
+              <div class="file-row">
+                ${ICONS.file}
+                <span class="file-name">${escapeHtml(item.fileName || item.text)}</span>
+                <span class="file-size">${formatSize(item.fileSize)}</span>
+              </div>
+              ${item.imageDataUrl ? `<img class="card-img" style="margin-top:6px;" src="${item.imageDataUrl}" alt="file preview" onerror="this.style.display='none'" />` : ''}
+            `;
+          } else {
+            bodyContent = `<div class="card-body">${escapeHtml(item.text)}</div>`;
+          }
+
+          let extraButtons = '';
+          if (item.type === 'url') {
+            extraButtons = `<button class="action-btn" onclick="openUrl('${escapeHtml(item.text)}', event)">${ICONS.external}<span>열기</span></button>`;
+          } else if (item.type === 'file') {
+            extraButtons = `<button class="action-btn" onclick="saveFile('${item.id}', event)">${ICONS.download}<span>저장</span></button>`;
+          }
+
+          return `
+            <div class="clip-card ${isLatest ? 'latest-active' : ''}" onclick="activateItem('${item.id}')">
+              <div class="card-header">
+                <div class="card-meta-left">
+                  ${idx < 9 ? `<span class="kbd-tag">⌘${idx + 1}</span>` : ''}
+                  <span class="type-badge ${item.type}">${badgeText}</span>
+                  <span class="source-label">${ICONS.platform(item.sourcePlatform)}<span>${escapeHtml(item.sourceDevice || '')}</span></span>
+                </div>
+                <span class="time-label">${formatTime(item.updatedAt)}</span>
+              </div>
+              ${bodyContent}
+              <div class="card-footer">
+                <span class="active-indicator">${isLatest ? '현재 시스템 클립보드' : '클릭하여 클립보드에 적용'}</span>
+                <div class="card-actions">
+                  ${extraButtons}
+                  <button class="action-btn ${item.pinned ? 'pinned' : ''}" onclick="togglePin('${item.id}', event)" title="고정">${ICONS.pin(item.pinned)}</button>
+                  <button class="action-btn" onclick="removeItem('${item.id}', event)" title="삭제">${ICONS.trash}</button>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    async function activateItem(id) {
+      const res = await window.clipsync.activateItem(id);
+      if (res && res.ok) {
+        showToast('시스템 클립보드에 적용되었습니다');
+      }
+    }
+
+    async function togglePin(id, ev) {
+      ev.stopPropagation();
+      const target = (appState.items || []).find((i) => i.id === id);
+      if (target) {
+        target.pinned = !target.pinned;
+        renderList();
+      }
+      try {
+        await window.clipsync.pinItem(id);
+      } catch {}
+    }
+
+    async function removeItem(id, ev) {
+      ev.stopPropagation();
+      appState.items = (appState.items || []).filter((i) => i.id !== id);
+      renderList();
+      try {
+        await window.clipsync.deleteItem(id);
+      } catch {}
+    }
+
+    async function clearAllHistory() {
+      // Optimistic update: keep only pinned items
+      appState.items = (appState.items || []).filter((i) => i.pinned);
+      renderList();
+      try {
+        await window.clipsync.clearAll();
+      } catch {}
+      showToast('고정 항목을 제외한 내역을 정리했습니다');
+    }
+
+    function openUrl(url, ev) {
+      ev.stopPropagation();
+      window.clipsync.openExternal(url);
+    }
+
+    async function saveFile(id, ev) {
+      ev.stopPropagation();
+      showToast('파일 다운로드 중...');
+      const res = await window.clipsync.saveFile(id);
+      if (res && res.ok) {
+        showToast('수신 폴더에 파일이 저장되었습니다');
+      }
+    }
+
+    async function uploadFiles() {
+      const res = await window.clipsync.uploadFileDialog();
+      if (res && res.ok) {
+        showToast('선택한 파일이 동기화되었습니다');
+      }
+    }
+
+    async function togglePinWindow() {
+      const next = !Boolean(appState.config && appState.config.alwaysOnTop);
+      appState.config = { ...(appState.config || {}), alwaysOnTop: next };
+      const pinBtn = document.getElementById('pinWindowBtn');
+      if (pinBtn) pinBtn.blur();
+      updateHeader();
+      showToast(next ? '창이 항상 위에 고정되었습니다 (다른 앱 클릭 시 유지)' : '창 고정이 해제되었습니다');
+
+      try {
+        const res = await window.clipsync.updateConfig({ alwaysOnTop: next });
+        if (res && res.config) {
+          appState.config = res.config;
+          updateHeader();
+        }
+      } catch (err) {
+        console.error('Pin toggle error:', err);
+      }
+    }
+
+    function setTab(tabName, el) {
+      currentTab = tabName;
+      document.querySelectorAll('.seg-tab').forEach((t) => t.classList.remove('active'));
+      el.classList.add('active');
+      renderList();
+    }
+
+    function syncModalBodyClass() {
+      const iosOpen = document.getElementById('iosModal')?.classList.contains('open');
+      const setOpen = document.getElementById('settingsModal')?.classList.contains('open');
+      document.body.classList.toggle('modal-open', Boolean(iosOpen || setOpen));
+    }
+
+    function closeIosModal() {
+      const modal = document.getElementById('iosModal');
+      if (modal) modal.classList.remove('open');
+      syncModalBodyClass();
+    }
+
+    function closeSettingsModal() {
+      stopShortcutRecording();
+      const modal = document.getElementById('settingsModal');
+      if (modal) modal.classList.remove('open');
+      syncModalBodyClass();
+    }
+
+    async function openIosModal() {
+      const fresh = await window.clipsync.getState();
+      appState = { ...appState, ...fresh };
+      document.getElementById('qrImg').src = appState.qrDataUrl || '';
+      document.getElementById('iosUrlText').textContent = appState.iosUrl || '';
+      const keyBadge = document.getElementById('iosSyncKeyBadge');
+      if (keyBadge) {
+        keyBadge.textContent = (appState.config && appState.config.syncKey) || '';
+      }
+      document.getElementById('iosModal').classList.add('open');
+      syncModalBodyClass();
+    }
+
+    function generateNewSyncKey() {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      const part = () =>
+        Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      const newKey = `CS-${part()}-${part()}`;
+      document.getElementById('cfgSyncKey').value = newKey;
+      showToast(`새 방 키(${newKey})가 생성되었습니다`);
+    }
+
+    function openSettingsModal() {
+      document.getElementById('cfgServerUrl').value = appState.config.serverUrl || 'http://localhost:4580';
+      document.getElementById('cfgSyncKey').value = appState.config.syncKey || 'default';
+      document.getElementById('cfgDeviceName').value = appState.config.deviceName || '';
+      document.getElementById('cfgAutoLaunch').checked = appState.config.autoLaunch !== false;
+      document.getElementById('cfgAutoSync').checked = Boolean(appState.config.autoSync);
+
+      selectedTheme = appState.config.theme || 'system';
+      selectTheme(selectedTheme);
+
+      currentShortcut = appState.config.shortcut || 'CommandOrControl+Shift+V';
+      stopShortcutRecording();
+      updateShortcutUI(appState.shortcutDisplay);
+
+      const appInfo = appState.appInfo || { version: '1.0.0', build: '20261020.7', platform: 'darwin' };
+      const buildLabel = document.getElementById('cfgBuildLabel');
+      if (buildLabel) {
+        const bNum = appInfo.buildNumber || appInfo.build || '20261020.7';
+        buildLabel.textContent = `ClipSync v${appInfo.version || '1.0.0'} (Build ${bNum})`;
+      }
+      const platLabel = document.getElementById('cfgPlatformLabel');
+      if (platLabel) {
+        const plat = appInfo.platformLabel || (appInfo.platform === 'win32' ? 'Windows x64' : (appInfo.platform === 'darwin' ? 'macOS (arm64)' : 'Desktop'));
+        platLabel.textContent = plat;
+      }
+
+      document.getElementById('settingsModal').classList.add('open');
+      syncModalBodyClass();
+    }
+
+    async function saveSettings() {
+      // 1. Close modal immediately so UI never hangs or turns black
+      closeSettingsModal();
+      showToast('환경설정이 저장되었습니다');
+
+      const serverUrl = document.getElementById('cfgServerUrl').value.trim() || 'http://localhost:4580';
+      const syncKey = document.getElementById('cfgSyncKey').value.trim() || 'default';
+      const deviceName = document.getElementById('cfgDeviceName').value.trim() || 'Desktop';
+      const autoLaunch = document.getElementById('cfgAutoLaunch').checked;
+      const autoSync = document.getElementById('cfgAutoSync').checked;
+
+      // Optimistic local config update
+      appState.config = {
+        ...appState.config,
+        serverUrl,
+        syncKey,
+        deviceName,
+        autoLaunch,
+        autoSync,
+        theme: selectedTheme,
+        shortcut: currentShortcut
+      };
+      updateHeader();
+
+      try {
+        const res = await window.clipsync.updateConfig({
+          serverUrl,
+          syncKey,
+          deviceName,
+          autoLaunch,
+          autoSync,
+          theme: selectedTheme,
+          shortcut: currentShortcut
+        });
+
+        if (res && res.config) {
+          appState.config = res.config;
+        }
+        if (res && res.shortcutDisplay) {
+          appState.shortcutDisplay = res.shortcutDisplay;
+          updateShortcutUI(res.shortcutDisplay);
+        }
+        if (res && res.isDark !== undefined) {
+          appState.isDark = res.isDark;
+          applyThemeToDOM(selectedTheme, res.isDark);
+        }
+      } catch (err) {
+        console.error('Config save error:', err);
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      // 1. 단축키 녹음 모드인 경우
+      if (isRecordingShortcut) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (e.key === 'Escape') {
+          stopShortcutRecording();
+          showToast('단축키 변경을 취소했습니다');
+          return;
+        }
+
+        // Modifiers 단독 입력은 조합 대기
+        if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) {
+          return;
+        }
+
+        // 최소한 하나의 Modifier 키 필요 (단독 문자키 글로벌 등록 방지)
+        const hasModifier = e.ctrlKey || e.metaKey || e.altKey;
+        if (!hasModifier) {
+          showToast('글로벌 단축키는 Ctrl/Cmd 또는 Alt 조합이 필요합니다');
+          return;
+        }
+
+        const isMac = (appState.appInfo && appState.appInfo.platform === 'darwin') || (typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform));
+        const parts = [];
+
+        // CommandOrControl 통일 (Mac에서는 Cmd, Win에서는 Ctrl)
+        if (isMac) {
+          if (e.metaKey) parts.push('CommandOrControl');
+          if (e.ctrlKey) parts.push('Control');
+          if (e.altKey) parts.push('Alt');
+          if (e.shiftKey) parts.push('Shift');
+        } else {
+          if (e.ctrlKey) parts.push('CommandOrControl');
+          if (e.altKey) parts.push('Alt');
+          if (e.shiftKey) parts.push('Shift');
+          if (e.metaKey) parts.push('Super');
+        }
+
+        let mainKey = '';
+        if (e.code && e.code.startsWith('Key')) {
+          mainKey = e.code.replace('Key', '');
+        } else if (e.code && e.code.startsWith('Digit')) {
+          mainKey = e.code.replace('Digit', '');
+        } else if (/^F\d{1,2}$/i.test(e.key)) {
+          mainKey = e.key.toUpperCase();
+        } else if (e.code === 'Space') {
+          mainKey = 'Space';
+        } else if (e.code === 'Enter') {
+          mainKey = 'Return';
+        } else if (e.code === 'Tab') {
+          mainKey = 'Tab';
+        } else if (e.key && e.key.length === 1) {
+          mainKey = e.key.toUpperCase();
+        } else {
+          mainKey = e.key;
+        }
+
+        if (!mainKey) return;
+
+        parts.push(mainKey);
+        currentShortcut = parts.join('+');
+        stopShortcutRecording();
+        updateShortcutUI();
+        showToast(`단축키가 설정되었습니다: ${formatShortcutDisplay(currentShortcut, appState.appInfo ? appState.appInfo.platform : 'darwin')}`);
+        return;
+      }
+
+      // 2. 일반 단축키 (숫자 1-9 빠른 적용 및 Escape 모달/창 숨김)
+      if ((e.metaKey || e.ctrlKey) && e.key >= '1' && e.key <= '9') {
+        const idx = parseInt(e.key, 10) - 1;
+        if (appState.items && appState.items[idx]) {
+          e.preventDefault();
+          activateItem(appState.items[idx].id);
+        }
+      } else if (e.key === 'Escape') {
+        const setModal = document.getElementById('settingsModal');
+        const iosModal = document.getElementById('iosModal');
+        if (setModal && setModal.classList.contains('open')) {
+          closeSettingsModal();
+        } else if (iosModal && iosModal.classList.contains('open')) {
+          closeIosModal();
+        } else {
+          window.clipsync.hideWindow();
+        }
+      }
+    });
+
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      document.getElementById('dropOverlay').classList.add('active');
+    });
+    window.addEventListener('dragleave', (e) => {
+      if (e.target === document.getElementById('dropOverlay')) {
+        document.getElementById('dropOverlay').classList.remove('active');
+      }
+    });
+    window.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      document.getElementById('dropOverlay').classList.remove('active');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const paths = Array.from(e.dataTransfer.files)
+          .map((f) => window.clipsync.getPathForFile(f))
+          .filter(Boolean);
+        if (paths.length > 0) {
+          showToast('파일 업로드 중...');
+          await window.clipsync.uploadDroppedFiles(paths);
+          showToast('파일 동기화가 완료되었습니다');
+        }
+      }
+    });
+
+    async function syncFreshState() {
+      try {
+        const state = await window.clipsync.getState();
+        if (state && Array.isArray(state.items)) {
+          appState = { ...appState, ...state };
+          if (appState.config && appState.config.theme) {
+            selectedTheme = appState.config.theme;
+          }
+          if (appState.config && appState.config.shortcut) {
+            currentShortcut = appState.config.shortcut;
+          }
+          applyThemeToDOM(selectedTheme, appState.isDark);
+          updateShortcutUI(appState.shortcutDisplay);
+          updateHeader();
+          renderList();
+        }
+      } catch (err) {
+        console.error('syncFreshState error:', err);
+      }
+    }
+
+    async function init() {
+      await syncFreshState();
+    }
+
+    window.clipsync.onStateUpdate((nextState) => {
+      appState = { ...appState, ...nextState };
+      if (appState.config && appState.config.theme) {
+        selectedTheme = appState.config.theme;
+      }
+      if (appState.config && appState.config.shortcut) {
+        currentShortcut = appState.config.shortcut;
+      }
+      applyThemeToDOM(selectedTheme, appState.isDark);
+      updateShortcutUI(appState.shortcutDisplay);
+      updateHeader();
+      renderList();
+    });
+
+    window.addEventListener('focus', syncFreshState);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) syncFreshState();
+    });
+    if (window.clipsync && window.clipsync.onWindowShown) {
+      window.clipsync.onWindowShown(syncFreshState);
+    }
+
+    // Safety polling net: every 1.2s when visible, guarantee fresh items without user restart
+    setInterval(() => {
+      if (!document.hidden) syncFreshState();
+    }, 1200);
+
+    if (window.clipsync && window.clipsync.onThemeChanged) {
+      window.clipsync.onThemeChanged((data) => {
+        if (data && data.isDark !== undefined) {
+          appState.isDark = data.isDark;
+          if (selectedTheme === 'system') {
+            applyThemeToDOM('system', data.isDark);
+          }
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ClipSync" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <title>ClipSync</title>
+  <style>
+    :root {
+      --bg-app: #09090b;
+      --bg-surface: #121216;
+      --bg-surface-hover: #18181d;
+      --bg-input: #0d0d10;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-default: rgba(255, 255, 255, 0.13);
+      --accent: #5e6ad2;
+      --accent-hover: #6e7ae2;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-tertiary: #71717a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Pretendard", "Segoe UI", sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-bottom: max(84px, env(safe-area-inset-bottom));
+      letter-spacing: -0.01em;
+    }
+
+    svg {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .container {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 3px 10px rgba(79, 70, 229, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .brand-title h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+    }
+
+    .dot.offline {
+      background: var(--danger);
+      box-shadow: none;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      height: 34px;
+      padding: 0 11px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn:active {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    /* Latest Quick Copy Card */
+    .latest-banner {
+      background: linear-gradient(180deg, rgba(94, 106, 210, 0.14) 0%, rgba(18, 18, 22, 0.95) 100%);
+      border: 1px solid rgba(94, 106, 210, 0.38);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .latest-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      color: #a5b4fc;
+      font-weight: 500;
+    }
+
+    .latest-preview {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-primary);
+      line-height: 1.48;
+      max-height: 78px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-all;
+    }
+
+    .latest-copy-btn {
+      width: 100%;
+      background: var(--accent);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 13.5px;
+      padding: 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .latest-copy-btn:active {
+      background: var(--accent-hover);
+    }
+
+    /* Send from iOS Box */
+    .send-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .send-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .send-input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      color: var(--text-primary);
+      padding: 9px 12px;
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .send-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 0 14px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .send-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-sub {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      padding: 8.5px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* Segmented Filter & Search */
+    .segmented-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      padding: 3px;
+      border-radius: 9px;
+      margin-bottom: 10px;
+    }
+
+    .tab {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 6.5px 0;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #222229;
+      color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    .search-box {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 9px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+
+    /* History List */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .clip-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .clip-card:active {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-default);
+    }
+
+    .clip-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+    }
+
+    .badge-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+    }
+    .badge.url { background: rgba(56, 189, 248, 0.12); color: #7dd3fc; }
+    .badge.image { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+    .badge.file { background: rgba(245, 158, 11, 0.12); color: #fcd34d; }
+
+    .clip-text {
+      font-size: 13.5px;
+      line-height: 1.48;
+      color: var(--text-primary);
+      word-break: break-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .clip-img {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 6px;
+      margin-top: 4px;
+      display: block;
+      object-fit: contain;
+      background: #070709;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .clip-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .act-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 4.5px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .act-btn.primary {
+      background: rgba(94, 106, 210, 0.16);
+      border-color: rgba(94, 106, 210, 0.4);
+      color: #c7d2fe;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #18181b;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--text-primary);
+      font-weight: 500;
+      font-size: 12.5px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.22s ease;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 900;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #141418;
+      border: 1px solid var(--border-default);
+      border-radius: 14px;
+      max-width: 460px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 18px;
+    }
+
+    .modal h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .guide-step {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: 9px;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .guide-step strong {
+      color: var(--text-primary);
+    }
+
+    .code-line {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      color: #a5b4fc;
+      word-break: break-all;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon" style="background:linear-gradient(135deg,#312e81 0%,#0f172a 100%);border:1px solid rgba(129,140,248,0.4);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="7.5" y="2.5" width="13.5" height="14.5" rx="3" fill="#6366f1" fill-opacity="0.48" stroke="#93c5fd" stroke-width="1.6"/>
+            <rect x="3" y="6.5" width="13.5" height="15" rx="3.2" fill="#0f172a" stroke="#e0e7ff" stroke-width="1.8"/>
+            <path d="M6.5 12h6.5M6.5 15.8h4.5" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>ClipSync</h1>
+          <div class="status-line">
+            <span id="wsDot" class="dot"></span>
+            <span id="wsStatus">동기화 연결됨</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openGuideModal()">연동 안내</button>
+        <button class="icon-btn" onclick="openSettingsModal()">설정</button>
+      </div>
+    </header>
+
+    <!-- One-Tap Latest Desktop Clipboard Copy -->
+    <div class="latest-banner" id="latestBanner">
+      <div class="latest-top">
+        <span id="latestSource">최근 동기화 항목</span>
+        <span id="latestTime"></span>
+      </div>
+      <div class="latest-preview" id="latestPreview">데스크탑에서 복사한 항목이 이곳에 실시간으로 표시됩니다.</div>
+      <button class="latest-copy-btn" onclick="copyLatestItem()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        <span>현재 클립보드로 복사</span>
+      </button>
+    </div>
+
+    <!-- Send from iPhone to Windows/Mac -->
+    <div class="send-card">
+      <div class="send-row">
+        <input id="manualInput" class="send-input" type="text" placeholder="데스크탑으로 전송할 텍스트 또는 URL..." />
+        <button class="btn-primary" onclick="sendManualText()">전송</button>
+      </div>
+      <div class="send-actions">
+        <button class="btn-sub" onclick="pasteAndSendFromClipboard()">클립보드 붙여넣어 전송</button>
+        <label class="btn-sub">
+          <span>사진·파일 업로드</span>
+          <input id="fileInput" type="file" style="display:none" onchange="uploadSelectedFile(event)" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Segmented Filter & Search -->
+    <div class="segmented-bar">
+      <button class="tab active" data-type="all" onclick="setFilter('all', this)">전체</button>
+      <button class="tab" data-type="text" onclick="setFilter('text', this)">텍스트·링크</button>
+      <button class="tab" data-type="image" onclick="setFilter('image', this)">이미지</button>
+      <button class="tab" data-type="file" onclick="setFilter('file', this)">파일</button>
+    </div>
+    <input id="searchInput" class="search-box" type="search" placeholder="클립보드 히스토리 검색..." oninput="renderItems()" />
+
+    <!-- Clipboard History List -->
+    <div id="historyList" class="history-list"></div>
+  </div>
+
+  <!-- iOS Guide Modal -->
+  <div id="guideModal" class="modal-backdrop" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <h2>iOS 클립보드 연동 가이드</h2>
+      <div class="guide-step">
+        <strong>1. Mac 경유 유니버설 클립보드 (자동 연동)</strong><br/>
+        Mac에서 ClipSync가 실행 중이면 Windows에서 복사한 텍스트·이미지가 Mac 시스템 클립보드로 자동 반영됩니다. 동일한 Apple ID(Handoff 활성화)의 iPhone에서는 별도 앱 실행 없이 <b>붙여넣기</b>만 누르면 즉시 입력됩니다.
+      </div>
+      <div class="guide-step">
+        <strong>2. iOS 단축어(Shortcuts) 연동</strong><br/>
+        iOS 단축어 앱에서 아래 URL을 가져와 <b>클립보드에 복사</b> 동작을 연결하면 뒷면 탭 또는 동작 버튼으로 언제든 최신 클립보드를 불러올 수 있습니다.
+        <div class="code-line" id="shortcutGetUrl"></div>
+        <button class="act-btn primary" style="margin-top:8px" onclick="copyText(document.getElementById('shortcutGetUrl').textContent, '단축어 URL이 복사되었습니다')">URL 복사</button>
+      </div>
+      <button class="latest-copy-btn" onclick="document.getElementById('guideModal').classList.remove('open')">닫기</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <h2>동기화 키 및 기기 설정</h2>
+      <div class="guide-step">
+        데스크탑(Windows / macOS) 앱에 설정된 <b>Sync Key(동기화 방 키)</b>와 동일한 키를 입력하면 해당 기기 간에만 격리되어 동기화됩니다.
+        <input id="syncKeyInput" class="send-input" style="width:100%;margin-top:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;" placeholder="CS-XXXX-XXXX" />
+        <input id="deviceNameInput" class="send-input" style="width:100%;margin-top:8px" placeholder="iPhone" />
+      </div>
+      <button class="latest-copy-btn" onclick="saveSettings()">저장 및 재연결</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">클립보드에 복사되었습니다</div>
+
+  <script>
+    const urlParams = new URLSearchParams(location.search);
+    let syncKey = urlParams.get('syncKey') || localStorage.getItem('clipsync_key') || 'default';
+    let deviceName = localStorage.getItem('clipsync_device') || 'iPhone';
+    if (urlParams.get('syncKey')) {
+      localStorage.setItem('clipsync_key', syncKey);
+    }
+
+    let allItems = [];
+    let currentFilter = 'all';
+    let ws = null;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return '';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function formatTime(iso) {
+      if (!iso) return '';
+      const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+      if (diff < 10) return '방금 전';
+      if (diff < 60) return `${diff}초 전`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+      return new Date(iso).toLocaleDateString('ko-KR');
+    }
+
+    function updateShortcutUrl() {
+      const base = location.origin;
+      document.getElementById('shortcutGetUrl').textContent =
+        `${base}/api/ios/latest?syncKey=${encodeURIComponent(syncKey)}`;
+    }
+
+    function connectWebSocket() {
+      if (ws) {
+        try { ws.close(); } catch {}
+      }
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${proto}//${location.host}/ws?syncKey=${encodeURIComponent(syncKey)}&deviceName=${encodeURIComponent(deviceName)}&platform=ios`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        document.getElementById('wsDot').classList.remove('offline');
+        document.getElementById('wsStatus').textContent = `동기화 활성 · ${syncKey}`;
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.event === 'init') {
+            allItems = data.items || [];
+            renderItems();
+          } else if (data.event === 'clipboard:new' && data.item) {
+            allItems = [data.item, ...allItems.filter(i => i.id !== data.item.id)];
+            renderItems();
+          } else if (data.event === 'clipboard:updated' && data.item) {
+            allItems = allItems.map(i => i.id === data.item.id ? data.item : i);
+            renderItems();
+          } else if (data.event === 'clipboard:deleted') {
+            allItems = allItems.filter(i => i.id !== data.id);
+            renderItems();
+          } else if (data.event === 'clipboard:cleared') {
+            allItems = data.items || [];
+            renderItems();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      ws.onclose = () => {
+        document.getElementById('wsDot').classList.add('offline');
+        document.getElementById('wsStatus').textContent = '연결 재시도 중...';
+        setTimeout(connectWebSocket, 2500);
+      };
+    }
+
+    async function copyItemToClipboard(item) {
+      if (!item) return;
+      try {
+        if (item.type === 'image' && item.imageDataUrl) {
+          const res = await fetch(item.imageDataUrl);
+          const blob = await res.blob();
+          if (navigator.clipboard && window.ClipboardItem) {
+            await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+            showToast('이미지가 클립보드에 복사되었습니다');
+            return;
+          }
+        }
+        await copyText(item.text || item.downloadUrl || '');
+      } catch (err) {
+        await copyText(item.text || '');
+      }
+    }
+
+    async function copyText(text, customMsg) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      showToast(customMsg || '클립보드에 복사되었습니다');
+    }
+
+    function copyLatestItem() {
+      if (allItems.length === 0) {
+        showToast('복사된 항목이 없습니다');
+        return;
+      }
+      copyItemToClipboard(allItems[0]);
+    }
+
+    async function sendManualText() {
+      const input = document.getElementById('manualInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      await fetch('/api/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          syncKey,
+          type: 'text',
+          text,
+          sourceDevice: deviceName,
+          sourcePlatform: 'ios'
+        })
+      });
+      showToast('데스크탑으로 전송되었습니다');
+    }
+
+    async function pasteAndSendFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!text || !text.trim()) {
+          showToast('클립보드가 비어 있습니다');
+          return;
+        }
+        await fetch('/api/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            syncKey,
+            type: 'text',
+            text,
+            sourceDevice: deviceName,
+            sourcePlatform: 'ios'
+          })
+        });
+        showToast('클립보드 항목을 전송했습니다');
+      } catch {
+        showToast('클립보드 접근 권한을 허용해 주세요');
+      }
+    }
+
+    async function uploadSelectedFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const normalizedName = (file.name || 'uploaded-file').normalize('NFC');
+      const fileNameEncoded = encodeURIComponent(normalizedName);
+      const formData = new FormData();
+      formData.append('syncKey', syncKey);
+      formData.append('sourceDevice', deviceName);
+      formData.append('sourcePlatform', 'ios');
+      formData.append('fileNameEncoded', fileNameEncoded);
+      formData.append('file', file, normalizedName);
+      showToast('업로드 중...');
+      await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'x-file-name-encoded': fileNameEncoded
+        },
+        body: formData
+      });
+      event.target.value = '';
+      showToast('파일 동기화가 완료되었습니다');
+    }
+
+    async function deleteItem(id, ev) {
+      ev.stopPropagation();
+      await fetch(`/api/items/${id}?syncKey=${encodeURIComponent(syncKey)}`, { method: 'DELETE' });
+    }
+
+    function setFilter(type, btn) {
+      currentFilter = type;
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderItems();
+    }
+
+    function renderItems() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const latestPreview = document.getElementById('latestPreview');
+      const latestSource = document.getElementById('latestSource');
+      const latestTime = document.getElementById('latestTime');
+
+      if (allItems.length > 0) {
+        const latest = allItems[0];
+        latestSource.textContent = `최근 · ${latest.sourceDevice || 'Desktop'}`;
+        latestTime.textContent = formatTime(latest.updatedAt);
+        if (latest.type === 'image') {
+          latestPreview.textContent = `이미지 (${latest.fileName || '클립보드 이미지'})`;
+        } else if (latest.type === 'file') {
+          latestPreview.textContent = `파일: ${latest.fileName} (${formatSize(latest.fileSize)})`;
+        } else {
+          latestPreview.textContent = latest.text;
+        }
+      } else {
+        latestSource.textContent = '최근 동기화 항목';
+        latestTime.textContent = '';
+        latestPreview.textContent = '데스크탑에서 복사한 항목이 이곳에 실시간으로 표시됩니다.';
+      }
+
+      const filtered = allItems.filter(item => {
+        if (currentFilter === 'text' && item.type !== 'text' && item.type !== 'url') return false;
+        if (currentFilter === 'image' && item.type !== 'image') return false;
+        if (currentFilter === 'file' && item.type !== 'file') return false;
+        if (query) {
+          const hay = `${item.text || ''} ${item.fileName || ''} ${item.sourceDevice || ''}`.toLowerCase();
+          return hay.includes(query);
+        }
+        return true;
+      });
+
+      const listEl = document.getElementById('historyList');
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center;color:var(--text-tertiary);padding:32px 0;font-size:12.5px;">표시할 클립보드 내역이 없습니다</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(item => {
+        const badgeLabel = item.type === 'url' ? 'URL' : item.type === 'image' ? '이미지' : item.type === 'file' ? '파일' : '텍스트';
+        let bodyHtml = '';
+        if (item.type === 'image' && item.imageDataUrl) {
+          bodyHtml = `<img class="clip-img" src="${item.imageDataUrl}" alt="clipboard image" />`;
+        } else if (item.type === 'file') {
+          bodyHtml = `<div class="clip-text"><strong>${escapeHtml(item.fileName || item.text)}</strong> <span style="color:var(--text-tertiary)">(${formatSize(item.fileSize)})</span></div>`;
+        } else {
+          bodyHtml = `<div class="clip-text">${escapeHtml(item.text)}</div>`;
+        }
+
+        let extraAction = '';
+        if (item.type === 'url') {
+          extraAction = `<a class="act-btn primary" href="${escapeAttr(item.text)}" target="_blank" onclick="event.stopPropagation()">열기</a>`;
+        } else if (item.downloadUrl) {
+          extraAction = `<a class="act-btn primary" href="${escapeAttr(item.downloadUrl)}" download onclick="event.stopPropagation()">저장</a>`;
+        }
+
+        return `
+          <div class="clip-card" onclick='copyById("${item.id}")'>
+            <div class="clip-meta">
+              <div class="badge-group">
+                <span class="badge ${item.type}">${badgeLabel}</span>
+                <span>${escapeHtml(item.sourceDevice || 'Device')}</span>
+              </div>
+              <span>${formatTime(item.updatedAt)}</span>
+            </div>
+            ${bodyHtml}
+            <div class="clip-actions">
+              ${extraAction}
+              <button class="act-btn" onclick='copyById("${item.id}"); event.stopPropagation();'>복사</button>
+              <button class="act-btn" onclick='deleteItem("${item.id}", event)'>삭제</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function copyById(id) {
+      const item = allItems.find(i => i.id === id);
+      if (item) copyItemToClipboard(item);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+    function escapeAttr(str) {
+      return String(str || '').replace(/"/g, '&quot;');
+    }
+
+    function openGuideModal() {
+      updateShortcutUrl();
+      document.getElementById('guideModal').classList.add('open');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('syncKeyInput').value = syncKey;
+      document.getElementById('deviceNameInput').value = deviceName;
+      document.getElementById('settingsModal').classList.add('open');
+    }
+
+    function saveSettings() {
+      syncKey = document.getElementById('syncKeyInput').value.trim() || 'default';
+      deviceName = document.getElementById('deviceNameInput').value.trim() || 'iPhone';
+      localStorage.setItem('clipsync_key', syncKey);
+      localStorage.setItem('clipsync_device', deviceName);
+      document.getElementById('settingsModal').classList.remove('open');
+      connectWebSocket();
+      showToast('설정이 저장되었습니다');
+    }
+
+    updateShortcutUrl();
+    connectWebSocket();
+  </script>
+</body>
+</html>

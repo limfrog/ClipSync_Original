@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: clipsync-relay-server
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 4580
